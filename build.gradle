@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'men.groupiron.GroupIronmenTrackerPluginTest'
+def pluginMainClass = 'dev.osrsmcp.OsrsMcpPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -27,8 +27,8 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'men.groupiron'
-version = '1.7.0'
+group = 'dev.osrsmcp'
+version = '0.1.0'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
