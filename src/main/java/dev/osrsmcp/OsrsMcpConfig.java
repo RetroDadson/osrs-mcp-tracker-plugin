@@ -9,7 +9,7 @@ import net.runelite.client.config.ConfigSection;
 public interface OsrsMcpConfig extends Config {
     @ConfigSection(
             name = "Login",
-            description = "Enter the login details you created on the website here",
+            description = "Enter the token you created on the website here",
             position = 0
     )
     String loginSection = "LoginSection";
@@ -21,16 +21,6 @@ public interface OsrsMcpConfig extends Config {
             closedByDefault = true
     )
     String connectionSection = "ConnectionSection";
-
-    @ConfigItem(
-            keyName = "loginName",
-            name = "Your Name (on the website)",
-            description = "This is the name you provided on the website when signing up",
-            section = loginSection
-    )
-    default String loginName() {
-        return "";
-    }
 
     @ConfigItem(
             keyName = "token",

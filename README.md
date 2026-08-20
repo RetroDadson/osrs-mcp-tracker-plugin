@@ -3,7 +3,7 @@
 Website: [osrsmcp.retrodadson.com](https://osrsmcp.retrodadson.com)
 Server/backend source: [github.com/RetroDadson/osrs-mcp-server](https://github.com/RetroDadson/osrs-mcp-server)
 
-This is a RuneLite plugin that tracks information about your OSRS character(s) and sends it to a companion server, which exposes that data through an [MCP](https://modelcontextprotocol.io/) server so an AI assistant (e.g. Claude) can query it directly. It works whether you're tracking yourself solo or sharing tracking with others, and for every OSRS account type (regular, Ironman, Hardcore Ironman, Ultimate Ironman, Group Ironman).
+This is a RuneLite plugin that tracks information about your OSRS character and sends it to a companion server, which exposes that data through an [MCP](https://modelcontextprotocol.io/) server so an AI assistant (e.g. Claude) can query it directly. It works for every OSRS account type (regular, Ironman, Hardcore Ironman, Ultimate Ironman, Group Ironman).
 
 Originally forked from [group-ironmen-tracker](https://github.com/christoabrown/group-ironmen-tracker) — thanks to the original author for the excellent groundwork this project builds on.
 
@@ -22,4 +22,4 @@ More data categories (Slayer tasks, kill counts, clue scrolls, deaths, farming p
 
 ## Setup
 
-Sign up on the website with your OSRS name (or add others to share tracking), then paste the login name and token it gives you into the plugin's config panel. Each character you want to track needs the plugin installed with that same login token.
+Sign up on the website with your OSRS name, then paste the token it gives you into the plugin's config panel.
