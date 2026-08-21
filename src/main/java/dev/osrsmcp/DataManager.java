@@ -1,5 +1,7 @@
 package dev.osrsmcp;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -22,7 +24,9 @@ public class DataManager {
     private CollectionLogV2Manager collectionLogV2Manager;
     @Inject
     private HttpRequestService httpRequestService;
-    private boolean isMemberRegistered = false;
+    @Inject
+    private Gson gson;
+    private String lastVerifiedPlayerName = null;
     private int skipNextNAttempts = 0;
 
     @Getter
@@ -70,23 +74,15 @@ public class DataManager {
         String token = config.authorizationToken().trim();
 
         if (token.length() > 0) {
-            // NOTE: We do this check so characters who are not authorized won't waste time serializing and sending
-            // their data. It is OK if the user switches characters or is removed from the login since the update call
-            // below will return a 401 where we set isMemberRegistered = false again.
-            if (!isMemberRegistered) {
-                boolean isMember = checkIfPlayerIsRegistered(token, playerName);
-
-                if (!isMember) {
-                    // NOTE: We don't really need to check this everytime I don't think.
-                    // Waiting for a game state event is not what we really want either
-                    // since membership can change at anytime from the website.
-                    skipNextNAttempts = 10;
-                    return;
-                }
-                isMemberRegistered = true;
+            // NOTE: We don't really need to check this everytime I don't think.
+            // Waiting for a game state event is not what we really want either
+            // since the token could be repointed at another login at any time from the website.
+            if (needsVerification(playerName) && !verifyAndCacheLoginName(token, playerName)) {
+                skipNextNAttempts = 10;
+                return;
             }
 
-            String url = getUpdateMemberUrl();
+            String url = getUpdateUrl();
             if (url == null) return;
 
             Map<String, Object> updates = new HashMap<>();
@@ -117,7 +113,7 @@ public class DataManager {
                 if (!response.isSuccessful()) {
                     skipNextNAttempts = 10;
                     if (response.getCode() == 401) {
-                        isMemberRegistered = false;
+                        lastVerifiedPlayerName = null;
                     }
                     restoreStateIfNothingUpdated();
                 } else {
@@ -129,13 +125,39 @@ public class DataManager {
         }
     }
 
-    private boolean checkIfPlayerIsRegistered(String token, String playerName) {
-        String url = amIMemberUrl(playerName);
-        if (url == null) return false;
+    // NOTE: Re-verify whenever the actively logged-in character differs from the last one we
+    // confirmed (covers both "never checked" and "character changed since last check"), not just
+    // once per session.
+    private boolean needsVerification(String playerName) {
+        return !playerName.equalsIgnoreCase(lastVerifiedPlayerName);
+    }
+
+    // It is OK if the token is later revoked/rotated since the update call in submitToApi() will
+    // return a 401 where we reset lastVerifiedPlayerName again.
+    private boolean verifyAndCacheLoginName(String token, String playerName) {
+        String verifiedName = verifyLoginName(token);
+        if (verifiedName == null || !verifiedName.equalsIgnoreCase(playerName)) {
+            return false;
+        }
+        lastVerifiedPlayerName = playerName;
+        return true;
+    }
+
+    /** Returns the login_name the token resolves to server-side, or null if the token is invalid/unreachable. */
+    private String verifyLoginName(String token) {
+        String baseUrl = baseUrl();
+        String url = baseUrl + "/api/am-i-logged-in";
 
         HttpRequestService.HttpResponse response = httpRequestService.get(url, token);
+        if (!response.isSuccessful()) return null;
 
-        return response.isSuccessful();
+        try {
+            JsonObject body = gson.fromJson(response.getBody(), JsonObject.class);
+            return body != null && body.has("login_name") ? body.get("login_name").getAsString() : null;
+        } catch (Exception e) {
+            log.warn("Failed to parse am-i-logged-in response: {}", e.toString());
+            return null;
+        }
     }
 
     // NOTE: These states should only be restored if a new update did not come in at some point before calling this
@@ -175,10 +197,9 @@ public class DataManager {
     private void postEvent(String path, Object body) {
         String token = config.authorizationToken().trim();
         String baseUrl = baseUrl();
-        String loginName = loginName();
-        if (token.isEmpty() || baseUrl == null || loginName == null) return;
+        if (token.isEmpty() || baseUrl == null) return;
 
-        String url = String.format("%s/api/login/%s/%s", baseUrl, loginName, path);
+        String url = String.format("%s/api/%s", baseUrl, path);
         httpRequestService.post(url, token, body);
     }
 
@@ -186,31 +207,11 @@ public class DataManager {
         return httpRequestService.getBaseUrl();
     }
 
-    private String loginName() {
-        String loginName = config.loginName().trim();
-        if (loginName.length() == 0) {
-            return null;
-        }
-
-        return loginName;
-    }
-
-    private String getUpdateMemberUrl() {
+    private String getUpdateUrl() {
         String baseUrl = baseUrl();
-        String loginName = loginName();
+        if (baseUrl == null) return null;
 
-        if (baseUrl == null || loginName == null) return null;
-
-        return String.format("%s/api/login/%s/update-member", baseUrl, loginName);
-    }
-
-    private String amIMemberUrl(String playerName) {
-        String baseUrl = baseUrl();
-        String loginName = loginName();
-
-        if (baseUrl == null || loginName == null) return null;
-
-        return String.format("%s/api/login/%s/am-i-a-member?member_name=%s", baseUrl, loginName, playerName);
+        return String.format("%s/api/update", baseUrl);
     }
 
     private boolean isBadWorldType() {
