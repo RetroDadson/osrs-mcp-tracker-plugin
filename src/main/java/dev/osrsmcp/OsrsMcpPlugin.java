@@ -7,6 +7,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.WorldView;
@@ -102,11 +103,16 @@ public class OsrsMcpPlugin extends Plugin {
         dataManager.getCombatAchievements().update(new CombatAchievementsState(playerName, client));
         dataManager.getFarmingPatches().update(FarmingPatchState.fromClient(playerName, client));
         refreshSlayerTask(playerName);
+        refreshAccountType(playerName);
     }
 
     @Subscribe
     public void onVarbitChanged(VarbitChanged event) {
         if (doNotUseThisData()) return;
+
+        if (event.getVarbitId() == VarbitID.IRONMAN) {
+            refreshAccountType(client.getLocalPlayer().getName());
+        }
 
         final int varpId = event.getVarpId();
         if (varpId == VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO || varpId == VarPlayerID.DIZANAS_QUIVER_TEMP_AMMO_AMOUNT) {
@@ -301,6 +307,13 @@ public class OsrsMcpPlugin extends Plugin {
         SlayerTaskState newTask = SlayerTaskState.fromClient(playerName, client);
         if (newTask != null) {
             dataManager.getSlayerTask().update(newTask);
+        }
+    }
+
+    private void refreshAccountType(String playerName) {
+        AccountTypeState accountType = AccountTypeState.fromClient(playerName, client);
+        if (accountType != null) {
+            dataManager.getAccountType().update(accountType);
         }
     }
 
