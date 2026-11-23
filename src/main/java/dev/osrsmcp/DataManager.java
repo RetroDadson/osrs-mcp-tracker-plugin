@@ -64,6 +64,8 @@ public class DataManager {
     @Getter
     private final DataState farmingPatches = new DataState("farming_patches", false);
     @Getter
+    private final DataState accountType = new DataState("account_type", false);
+    @Getter
     private final DepositedItems deposited = new DepositedItems();
 
     public void submitToApi() {
@@ -105,6 +107,7 @@ public class DataManager {
             slayerTask.consumeState(updates);
             combatAchievements.consumeState(updates);
             farmingPatches.consumeState(updates);
+            accountType.consumeState(updates);
             collectionLogV2Manager.consumeClogItems(updates);
 
             if (updates.size() > 1) {
@@ -180,6 +183,7 @@ public class DataManager {
         slayerTask.restoreState();
         combatAchievements.restoreState();
         farmingPatches.restoreState();
+        accountType.restoreState();
     }
 
     public void reportSlayerTaskCompletion(SlayerTaskCompletion event) {
