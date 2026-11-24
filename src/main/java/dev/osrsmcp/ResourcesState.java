@@ -32,8 +32,6 @@ public class ResourcesState implements ConsumableState {
     private final CurrentMax prayer;
     @Getter
     private final CurrentMax energy;
-    @Getter
-    int world;
     private transient final String playerName;
 
     ResourcesState(String playerName, Client client) {
@@ -50,16 +48,16 @@ public class ResourcesState implements ConsumableState {
                 client.getEnergy(),
                 100
         );
-        world = client.getWorld();
     }
 
+    // NOTE: The world number is deliberately not collected. Together with a player's name it is enough
+    // to find them in-game, and it adds nothing for an AI assistant.
     @Override
     public Object get() {
         return new int[] {
                 hitpoints.current, hitpoints.max,
                 prayer.current, prayer.max,
-                energy.current, energy.max,
-                world
+                energy.current, energy.max
         };
     }
 
@@ -74,6 +72,6 @@ public class ResourcesState implements ConsumableState {
         if (!(o instanceof ResourcesState)) return false;
 
         ResourcesState other = (ResourcesState) o;
-        return other.world == world && other.hitpoints.equals(hitpoints) && other.prayer.equals(prayer) && other.energy.equals(energy);
+        return other.hitpoints.equals(hitpoints) && other.prayer.equals(prayer) && other.energy.equals(energy);
     }
 }

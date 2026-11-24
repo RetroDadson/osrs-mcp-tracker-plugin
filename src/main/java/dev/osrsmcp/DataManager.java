@@ -44,8 +44,6 @@ public class DataManager {
     @Getter
     private final DataState quests = new DataState("quests", false);
     @Getter
-    private final DataState position = new DataState("coordinates", false);
-    @Getter
     private final DataState runePouch = new DataState("rune_pouch", false);
     @Getter
     private final DataState quiver = new DataState("quiver", false);
@@ -96,7 +94,6 @@ public class DataManager {
             resources.consumeState(updates);
             skills.consumeState(updates);
             quests.consumeState(updates);
-            position.consumeState(updates);
             runePouch.consumeState(updates);
             quiver.consumeState(updates);
             interacting.consumeState(updates);
@@ -172,7 +169,6 @@ public class DataManager {
         resources.restoreState();
         skills.restoreState();
         quests.restoreState();
-        position.restoreState();
         runePouch.restoreState();
         quiver.restoreState();
         interacting.restoreState();
