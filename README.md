@@ -11,16 +11,15 @@ Currently tracks:
 
 * Inventory, equipment, bank, rune pouch, quiver, seed vault, potion storage, and shared bank
 * Skill XP
-* World position
-* HP, prayer, energy, and world
+* HP, prayer, and run energy
 * Quest completion status
-* Health and position of NPCs the player is interacting with
+* Name and health of the NPC the player is interacting with
 * Achievement Diaries
 * Collection Log
 * Combat Achievements
 * Slayer task (current task and completed tasks)
 * Clue scroll completions
-* Deaths (location and likely killer)
+* Deaths (time and likely killer)
 * Farming patches
 * Account type (regular, Ironman, Hardcore, Ultimate, Group)
 

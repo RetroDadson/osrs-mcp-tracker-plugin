@@ -2,9 +2,11 @@ package dev.osrsmcp;
 
 import lombok.Getter;
 import net.runelite.api.Actor;
-import net.runelite.api.Client;
-import net.runelite.api.coords.WorldPoint;
 
+/**
+ * What the player is currently interacting with: the target's name and health only. The target's
+ * location is deliberately not collected, since it would reveal the player's own position.
+ */
 public class InteractingState implements ConsumableState {
     private final transient String playerName;
     @Getter
@@ -13,17 +15,12 @@ public class InteractingState implements ConsumableState {
     private final int scale;
     @Getter
     private final int ratio;
-    @Getter
-    private final LocationState location;
 
-    public InteractingState(String playerName, Actor actor, Client client) {
+    public InteractingState(String playerName, Actor actor) {
         this.playerName = playerName;
         this.scale = actor.getHealthScale();
         this.ratio = actor.getHealthRatio();
         this.name = actor.getName();
-
-        WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, actor.getLocalLocation());
-        this.location = new LocationState(playerName, worldPoint, false);
     }
 
     @Override

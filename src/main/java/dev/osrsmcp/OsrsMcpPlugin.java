@@ -3,14 +3,12 @@ package dev.osrsmcp;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.WorldView;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -80,12 +78,6 @@ public class OsrsMcpPlugin extends Plugin {
         Player player = client.getLocalPlayer();
         String playerName = player.getName();
         dataManager.getResources().update(new ResourcesState(playerName, client));
-
-        WorldView worldView = player.getWorldView();
-        boolean isOnBoat = worldView.getId() != WorldView.TOPLEVEL;
-        WorldPoint worldPoint = resolveWorldPoint(player);
-        dataManager.getPosition().update(new LocationState(playerName, worldPoint, isOnBoat));
-
         dataManager.getRunePouch().update(new RunePouchState(playerName, client));
         dataManager.getQuiver().update(new QuiverState(playerName, client, itemManager));
     }
@@ -243,10 +235,7 @@ public class OsrsMcpPlugin extends Plugin {
         Player player = client.getLocalPlayer();
         if (event.getActor() != player) return;
 
-        WorldPoint worldPoint = resolveWorldPoint(player);
-        String killer = resolveKiller();
-        dataManager.reportDeath(new DeathEvent(player.getName(), worldPoint.getX(), worldPoint.getY(),
-                worldPoint.getPlane(), killer));
+        dataManager.reportDeath(new DeathEvent(player.getName(), resolveKiller()));
     }
 
     @Nullable
@@ -266,16 +255,6 @@ public class OsrsMcpPlugin extends Plugin {
         itemsDeposited = 2;
     }
 
-    private WorldPoint resolveWorldPoint(Player player) {
-        WorldView worldView = player.getWorldView();
-        int worldViewId = worldView.getId();
-        if (worldViewId != WorldView.TOPLEVEL) {
-            WorldEntity worldEntity = client.getTopLevelWorldView().worldEntities().byIndex(worldViewId);
-            return WorldPoint.fromLocalInstance(client, worldEntity.getLocalLocation());
-        }
-        return WorldPoint.fromLocalInstance(client, player.getLocalLocation());
-    }
-
     private void updateInteracting() {
         Player player = client.getLocalPlayer();
 
@@ -284,7 +263,7 @@ public class OsrsMcpPlugin extends Plugin {
 
             if (actor != null) {
                 String playerName = player.getName();
-                dataManager.getInteracting().update(new InteractingState(playerName, actor, client));
+                dataManager.getInteracting().update(new InteractingState(playerName, actor));
             }
         }
     }
