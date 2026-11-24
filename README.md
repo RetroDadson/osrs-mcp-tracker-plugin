@@ -9,7 +9,7 @@ Originally forked from [group-ironmen-tracker](https://github.com/christoabrown/
 
 Currently tracks:
 
-* Inventory, equipment, bank, rune pouch, seed vault, and shared bank
+* Inventory, equipment, bank, rune pouch, quiver, seed vault, potion storage, and shared bank
 * Skill XP
 * World position
 * HP, prayer, energy, and world
@@ -17,8 +17,14 @@ Currently tracks:
 * Health and position of NPCs the player is interacting with
 * Achievement Diaries
 * Collection Log
+* Combat Achievements
+* Slayer task (current task and completed tasks)
+* Clue scroll completions
+* Deaths (location and likely killer)
+* Farming patches
+* Account type (regular, Ironman, Hardcore, Ultimate, Group)
 
-More data categories (Slayer tasks, kill counts, clue scrolls, deaths, farming patches) are on the way — see the [server repo](https://github.com/RetroDadson/osrs-mcp-server) for the current roadmap.
+The server also pulls boss/activity kill counts and clue scroll totals from the OSRS Hiscores, so the plugin doesn't need to track those itself.
 
 ## Setup
 
