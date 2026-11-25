@@ -200,7 +200,8 @@ public class DataManager {
         if (token.isEmpty() || baseUrl == null) return;
 
         String url = String.format("%s/api/%s", baseUrl, path);
-        httpRequestService.post(url, token, body);
+        // Called from event subscribers on the client thread, so this must not block.
+        httpRequestService.postAsync(url, token, body);
     }
 
     private String baseUrl() {

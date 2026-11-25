@@ -17,14 +17,16 @@ public class HttpRequestService {
             "OsrsMcpTracker/" + PluginVersion.get() + " " + "RuneLite/" + RuneLiteProperties.getVersion();
     private static final String PUBLIC_BASE_URL = "https://osrsmcp.retrodadson.com";
 
-    @Inject
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient;
+    private final OsrsMcpConfig config;
+    private final Gson gson;
 
     @Inject
-    private OsrsMcpConfig config;
-
-    @Inject
-    private Gson gson;
+    HttpRequestService(OkHttpClient okHttpClient, OsrsMcpConfig config, Gson gson) {
+        this.okHttpClient = okHttpClient;
+        this.config = config;
+        this.gson = gson;
+    }
 
     public HttpResponse get(String url, String authToken) {
         Request request = buildRequest(url, authToken).get().build();
@@ -39,6 +41,31 @@ public class HttpRequestService {
         Request request = buildRequest(url, authToken).post(body).build();
 
         return executeRequest(request, "POST", url, requestJson);
+    }
+
+    /**
+     * Fire-and-forget POST on OkHttp's dispatcher thread. Use this from event subscribers, which run on
+     * the client thread: a blocking call there would freeze the game until the server responds or times out.
+     */
+    public void postAsync(String url, String authToken, Object requestBody) {
+        String requestJson = gson.toJson(requestBody);
+        RequestBody body = RequestBody.create(JSON, requestJson);
+
+        Request request = buildRequest(url, authToken).post(body).build();
+
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException ex) {
+                log.warn("POST {} failed: {}", url, ex.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+                try (Response r = response) {
+                    logRequest("POST", url, requestJson, r, readBodySafe(r));
+                }
+            }
+        });
     }
 
     private Request.Builder buildRequest(String url, String authToken) {
